@@ -1,0 +1,811 @@
+```jsx
+import React, { useState } from 'react';
+
+const App = () => {
+  const [activeSection, setActiveSection] = useState('home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  // Comprehensive claims categories with detailed information
+  const claimCategories = [
+    {
+      id: 'collision',
+      name: 'Collision Claims',
+      icon: '🚗',
+      description: 'Damage from vehicle-to-vehicle or vehicle-to-object collisions',
+      keyPoints: [
+        'Requires police report for significant damage or injuries',
+        'Your deductible applies regardless of fault',
+        'Coverage applies even if you\'re at fault',
+        'Includes single-vehicle accidents (hitting trees, poles, etc.)'
+      ],
+      documentation: [
+        'Photos of all vehicle damage from multiple angles',
+        'Police report number and officer details',
+        'Contact information for all drivers involved',
+        'Witness statements and contact information',
+        'Exact location and GPS coordinates of the incident'
+      ],
+      timeline: '7-21 days for processing and settlement'
+    },
+    {
+      id: 'theft',
+      name: 'Theft Claims',
+      icon: '🔒',
+      description: 'Stolen vehicle or theft of vehicle parts/accessories',
+      keyPoints: [
+        'Must file a police report immediately',
+        '30-day investigation period typical',
+        'Vehicle must be insured for comprehensive coverage',
+        'May require proof of ownership documents'
+      ],
+      documentation: [
+        'Official police report and case number',
+        'Vehicle registration and title documents',
+        'Proof of ownership (purchase agreement, loan documents)',
+        'Keys and security features information',
+        'Last known location and time of discovery'
+      ],
+      timeline: '30-45 days for total loss determination'
+    },
+    {
+      id: 'hail',
+      name: 'Hail Damage Claims',
+      icon: '⛈️',
+      description: 'Damage from hail storms and severe weather',
+      keyPoints: [
+        'Part of comprehensive coverage',
+        'No deductible if caused by natural disaster (in some provinces)',
+        'Hidden damage often discovered during repair',
+        'Time-sensitive reporting (usually within 48 hours)'
+      ],
+      documentation: [
+        'Clear photos showing hail dent patterns',
+        'Date, time, and location of the storm',
+        'Weather reports confirming hail event',
+        'Before and after photos if repairs attempted',
+        'Vehicle location during the storm (driveway, parking lot, etc.)'
+      ],
+      timeline: '5-14 days for assessment and repair approval'
+    },
+    {
+      id: 'vandalism',
+      name: 'Vandalism Claims',
+      icon: '🎨',
+      description: 'Intentional damage to your vehicle',
+      keyPoints: [
+        'Requires police report for validation',
+        'Deductible applies under comprehensive coverage',
+        'Surveillance footage can strengthen your claim',
+        'May require proof that damage was intentional'
+      ],
+      documentation: [
+        'Police report and case number',
+        'Timestamped photos of damage',
+        'Security camera footage if available',
+        'Evidence of forced entry or malicious intent',
+        'Location and circumstances of discovery'
+      ],
+      timeline: '7-21 days for investigation and settlement'
+    },
+    {
+      id: 'fire',
+      name: 'Fire Damage Claims',
+      icon: '🔥',
+      description: 'Vehicle damage from fire or explosion',
+      keyPoints: [
+        'Covers accidental fires (electrical, fuel system, etc.)',
+        'Excludes intentional arson',
+        'Fire department report required',
+        'May involve subrogation if third party responsible'
+      ],
+      documentation: [
+        'Fire department report and investigation findings',
+        'Photos of fire damage and origin point',
+        'Maintenance records showing proper vehicle care',
+        'Witness statements about fire circumstances',
+        'Location where fire occurred'
+      ],
+      timeline: '14-30 days for full assessment and settlement'
+    },
+    {
+      id: 'storm',
+      name: 'Storm Damage Claims',
+      icon: '🌀',
+      description: 'Damage from wind, lightning, or falling objects',
+      keyPoints: [
+        'Covered under comprehensive coverage',
+        'Includes damage from falling trees or branches',
+        'Windshield damage may have separate deductible',
+        'Requires documentation of weather conditions'
+      ],
+      documentation: [
+        'Photos of damage and surrounding conditions',
+        'Weather reports confirming storm event',
+        'Date, time, and location of incident',
+        'Evidence of wind speed or lightning strikes',
+        'Proof of vehicle location during storm'
+      ],
+      timeline: '5-14 days for assessment and repair approval'
+    },
+    {
+      id: 'flood',
+      name: 'Flood Damage Claims',
+      icon: '🌊',
+      description: 'Water damage from flooding or submerged vehicles',
+      keyPoints: [
+        'Do not attempt to start a flooded vehicle',
+        'Comprehensive coverage required',
+        'May qualify for loss of use benefits',
+        'Severe water damage often results in total loss'
+      ],
+      documentation: [
+        'Photos showing water levels and vehicle condition',
+        'Contact insurer within 24-48 hours',
+        'Professional towing documentation',
+        'Location details including street address and landmarks',
+        'Weather reports showing precipitation levels'
+      ],
+      timeline: '7-21 days for water damage assessment'
+    },
+    {
+      id: 'animals',
+      name: 'Animal Collision Claims',
+      icon: '🦌',
+      description: 'Accidents involving wildlife or domestic animals',
+      keyPoints: [
+        'Typically covered under comprehensive coverage',
+        'Some insurers waive deductible for animal collisions',
+        'May include damage from swerving to avoid animals',
+        'Common in rural and forested areas'
+      ],
+      documentation: [
+        'Photos of vehicle damage and animal remains',
+        'Location, time, and road conditions',
+        'Witness statements if available',
+        'Highway patrol or wildlife agency reports',
+        'Mile marker, highway number, and direction of travel'
+      ],
+      timeline: '5-14 days for assessment and settlement'
+    },
+    {
+      id: 'glass',
+      name: 'Glass Damage Claims',
+      icon: '🪟',
+      description: 'Windshield or window damage from rocks or debris',
+      keyPoints: [
+        'Often has zero or reduced deductible',
+        'Repair rather than replacement when possible',
+        'Safety concern requiring prompt attention',
+        'May be covered under separate glass protection'
+      ],
+      documentation: [
+        'Photos of damage from multiple angles',
+        'Size and location of cracks/chips',
+        'Date and location where damage occurred',
+        'Evidence of cause (road debris, etc.)',
+        'Before and after repair photos'
+      ],
+      timeline: '1-7 days for repair authorization'
+    },
+    {
+      id: 'natural-disaster',
+      name: 'Natural Disaster Claims',
+      icon: '🌪️',
+      description: 'Damage from earthquakes, landslides, or other natural events',
+      keyPoints: [
+        'Requires comprehensive coverage',
+        'May involve government disaster declarations',
+        'Special processing for widespread events',
+        'Priority handling during disaster recovery'
+      ],
+      documentation: [
+        'Photos of damage and surrounding area',
+        'Official disaster declaration documents',
+        'Weather service reports and seismic data',
+        'Location and elevation details',
+        'Timing of the event relative to damage'
+      ],
+      timeline: '10-30 days depending on event scale'
+    },
+    {
+      id: 'rodent',
+      name: 'Rodent Damage Claims',
+      icon: '🐭',
+      description: 'Infestation or damage caused by mice, rats, or other rodents',
+      keyPoints: [
+        'Stop using the vehicle immediately to prevent exposure',
+        'Comprehensive coverage typically includes rodent damage',
+        'Health risks from droppings, nesting materials, and odors',
+        'Requires professional extermination and remediation'
+      ],
+      documentation: [
+        'Photos of visible signs: droppings, nesting materials, chewed wires',
+        'Description of any unusual odors or sounds from the vehicle',
+        'Date when rodent activity was first noticed',
+        'Proof of vehicle storage conditions (garage, outdoor, etc.)',
+        'Contact information for any witnesses or service providers'
+      ],
+      timeline: '10-25 days for complete remediation and settlement'
+    },
+    {
+      id: 'rv-water',
+      name: 'RV Water Damage Claims',
+      icon: '🚐💧',
+      description: 'Water intrusion and moisture damage in recreational vehicles',
+      keyPoints: [
+        'Only sudden and accidental damage is covered',
+        'Gradual damage from neglect is typically excluded',
+        'Proper winterization is required to maintain coverage',
+        'Special endorsements may be needed for full protection'
+      ],
+      documentation: [
+        'Photos showing the source of water intrusion',
+        'Date and circumstances of discovery',
+        'Maintenance records and service history',
+        'Winterization receipts and inspection reports',
+        'Evidence of temporary mitigation efforts'
+      ],
+      timeline: '14-45 days due to complex assessment requirements'
+    }
+  ];
+
+  // Fuzzy matching function
+  const fuzzyMatch = (query, term) => {
+    const queryLower = query.toLowerCase().trim();
+    const termLower = term.toLowerCase().trim();
+    
+    // Direct match
+    if (termLower.includes(queryLower)) return true;
+    
+    // Common variations
+    const variations = {
+      'collis': ['collision', 'crash', 'accident', 'wreck'],
+      'theft': ['stolen', 'stole', 'stolen vehicle', 'robbery'],
+      'hail': ['hailing', 'hailstorm', 'weather damage'],
+      'vandal': ['vandalized', 'vandalism', 'malicious damage'],
+      'fire': ['burn', 'burning', 'combustion', 'arson'],
+      'storm': ['wind', 'lightning', 'weather', 'hurricane'],
+      'flood': ['flooding', 'water', 'submerged', 'hydro'],
+      'animal': ['deer', 'wildlife', 'collision', 'hit animal'],
+      'glass': ['windshield', 'window', 'crack', 'chip'],
+      'natural': ['earthquake', 'disaster', 'landslide', 'tornado'],
+      'rodent': ['mouse', 'mice', 'rat', 'vermin', 'pest', 'infestation', 'nesting'],
+      'pest': ['rodent', 'mouse', 'rat', 'vermin', 'infestation'],
+      'vermin': ['rodent', 'mouse', 'rat', 'pest', 'infestation'],
+      'rv': ['recreational vehicle', 'motorhome', 'camper', 'trailer'],
+      'water': ['leak', 'moisture', 'flood', 'seepage', 'damp'],
+      'moisture': ['water', 'leak', 'damp', 'humidity', 'condensation'],
+      'leak': ['water', 'moisture', 'drip', 'seepage'],
+      'winter': ['freeze', 'frozen', 'burst pipe', 'antifreeze']
+    };
+
+    for (const [key, values] of Object.entries(variations)) {
+      if (queryLower.includes(key) && values.some(v => termLower.includes(v))) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Search function
+  const performSearch = (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results = [];
+    const queryLower = query.toLowerCase().trim();
+
+    // Search through claim categories
+    claimCategories.forEach(category => {
+      if (fuzzyMatch(query, category.name) || 
+          fuzzyMatch(query, category.description) ||
+          category.keyPoints.some(point => fuzzyMatch(query, point)) ||
+          category.documentation.some(doc => fuzzyMatch(query, doc))) {
+        
+        results.push({
+          type: 'claim',
+          title: category.name,
+          content: category.description,
+          section: 'claims',
+          sectionName: 'Claim Guides',
+          match: query,
+          category: category
+        });
+      }
+    });
+
+    setSearchResults(results);
+  };
+
+  // Handle search input
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Execute search on input change
+  React.useEffect(() => {
+    performSearch(searchQuery);
+  }, [searchQuery]);
+
+  const Header = () => (
+    <header className="bg-gradient-to-r from-blue-900 to-blue-800 text-white shadow-lg">
+      <div className="container mx-auto px-6 py-8">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Auto Claim Academy</h1>
+          <p className="text-xl opacity-90">Your trusted guide to fair insurance settlements</p>
+        </div>
+      </div>
+    </header>
+  );
+
+  const Navigation = () => (
+    <nav className="bg-white shadow-md sticky top-0 z-50 border-b border-gray-200">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col">
+          {/* Main navigation tabs */}
+          <div className="flex space-x-8">
+            {['home', 'terms', 'claims', 'repairs', 'settlement', 'tips'].map((section) => (
+              <button
+                key={section}
+                onClick={() => setActiveSection(section)}
+                className={`py-4 px-3 border-b-2 font-medium text-sm transition-all duration-200 capitalize relative group ${
+                  activeSection === section
+                    ? 'border-blue-600 text-blue-600 font-semibold'
+                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
+                }`}
+              >
+                {section === 'settlement' ? 'Cash Settlement' : 
+                 section === 'repairs' ? 'Repairs Process' : section}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+              </button>
+            ))}
+          </div>
+
+          {/* Global search bar */}
+          <div className="py-6">
+            <div className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="Search any insurance term (e.g., collision, flood, RV water)..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
+                  aria-label="Search insurance terms"
+                />
+              </div>
+              <button
+                onClick={() => performSearch(searchQuery)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Search
+              </button>
+            </div>
+
+            {/* Search results */}
+            {searchResults.length > 0 && (
+              <div className="mt-4 bg-gray-100 rounded-lg p-4 max-w-3xl mx-auto">
+                <h4 className="font-semibold text-gray-800 mb-3">Search Results:</h4>
+                <div className="space-y-3">
+                  {searchResults.map((result, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setActiveSection('claims')}
+                      className="p-3 bg-white rounded border border-gray-200 hover:bg-blue-50 cursor-pointer transition-colors duration-200"
+                    >
+                      <div className="flex items-start justify-between">
+                        <h5 className="font-semibold text-gray-800 text-sm flex-1">
+                          {result.title}
+                        </h5>
+                        <span className="inline-flex items-center px-2 py-1 ml-2 text-xs font-medium rounded bg-blue-100 text-blue-800">
+                          Found in: Claim Guides
+                        </span>
+                      </div>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {result.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Fallback message */}
+            {searchResults.length === 0 && searchQuery.trim() !== '' && (
+              <div className="mt-4 bg-gray-100 rounded-lg p-4 max-w-3xl mx-auto">
+                <p className="text-gray-600 text-center italic">
+                  No matches found — try browsing the Claim Guides tab
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
+  const HomeSection = () => (
+    <div className="py-12">
+      <div className="container mx-auto px-6">
+        <div className="max-w-4xl mx-auto text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-800 mb-6 leading-tight">
+            Master Your Auto Insurance Claims
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            Learn how to document properly, understand your policy, and negotiate fair settlements 
+            for any type of auto insurance claim.
+          </p>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100 mb-8">
+            <p className="text-lg text-blue-800 font-medium">
+              "78% of claimants receive higher settlements when they understand their rights and document properly."
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mb-12">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">Available Claim Types</h3>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {claimCategories.slice(0, 6).map((category) => (
+              <div key={category.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <div className="text-2xl mb-2">{category.icon}</div>
+                <h4 className="font-semibold text-blue-700 mb-2">{category.name}</h4>
+                <p className="text-sm text-gray-600">{category.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center">
+          <button 
+            onClick={() => setActiveSection('claims')}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+          >
+            Explore All Claim Guides
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ClaimsSection = () => (
+    <div className="py-12">
+      <div className="container mx-auto px-6">
+        <div className="max-w-6xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Comprehensive Claim Guides</h2>
+          <p className="text-lg text-gray-600">
+            Detailed instructions for every type of auto insurance claim
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {claimCategories.map((category) => (
+            <div key={category.id} className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-center mb-6">
+                <div className="text-4xl mr-4">{category.icon}</div>
+                <h3 className="text-2xl font-bold text-gray-800">{category.name}</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6 leading-relaxed">{category.description}</p>
+              
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-lg font-semibold text-blue-700 mb-3">Key Information</h4>
+                  <ul className="space-y-2">
+                    {category.keyPoints.map((point, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-500 mr-3 mt-1">•</span>
+                        <span className="text-gray-700">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-green-700 mb-3">Required Documentation</h4>
+                  <ul className="space-y-2">
+                    {category.documentation.map((doc, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-green-500 mr-3 mt-1">•</span>
+                        <span className="text-gray-700">{doc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-800 mb-2">Processing Timeline</h4>
+                  <p className="text-blue-700">{category.timeline}</p>
+                </div>
+              </div>
+
+              {/* Special rodent claim instructions */}
+              {category.id === 'rodent' && (
+                <div className="mt-8 border-t pt-6">
+                  <h4 className="text-xl font-bold text-red-700 mb-4">🐭 What to Do If You Notice Mice or Rodents Inside Your Vehicle</h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex">
+                      <div className="bg-red-100 text-red-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">1</div>
+                      <div>
+                        <h5 className="font-semibold text-gray-800">Stop Using the Vehicle Immediately</h5>
+                        <p className="text-gray-600 text-sm">Avoid turning on the HVAC system or driving the car, as contaminated airflow can spread bacteria or allergens.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex">
+                      <div className="bg-red-100 text-red-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">2</div>
+                      <div>
+                        <h5 className="font-semibold text-gray-800">Contact Your Insurance Company to File a Rodent Claim</h5>
+                        <p className="text-gray-600 text-sm">Inform them of visible signs: droppings, nest materials, chewed wires, or foul odor.</p>
+                        <p className="text-gray-600 text-sm mt-1">The insurer will guide you through the claim process and typically help schedule:</p>
+                        <ul className="text-sm text-gray-600 ml-5 list-disc mt-1">
+                          <li>An appointment with a licensed <strong>exterminator/remediation shop</strong></li>
+                          <li>An evaluation with a certified <strong>appraiser or adjuster</strong></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="flex">
+                      <div className="bg-red-100 text-red-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">3</div>
+                      <div>
+                        <h5 className="font-semibold text-gray-800">Let the Insurance Company Arrange the Towing</h5>
+                        <p className="text-gray-600 text-sm">It's best to <strong>let your insurer coordinate towing</strong> to both the exterminator and the appraiser.</p>
+                        <p className="text-gray-600 text-sm">This prevents unnecessary exposure to contamination and ensures safe handling.</p>
+                        <p className="text-gray-600 text-sm">Towing may be covered under your policy or added services.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex">
+                      <div className="bg-red-100 text-red-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0 mt-1">4</div>
+                      <div>
+                        <h5 className="font-semibold text-gray-800">Safety First—for You and Your Family</h5>
+                        <p className="text-gray-600 text-sm">Rodent infestations can leave behind pathogens harmful to humans.</p>
+                        <p className="text-gray-600 text-sm">Insurers and remediation partners will handle cleaning and documentation safely and professionally.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                    <p className="text-sm text-yellow-800">
+                      <strong>🛡️ Tip:</strong> "If you smell something unusual or spot rodent activity inside your vehicle, don't risk your health—file a claim and let your insurer take over the logistics. Professional exterminators and appraisers will sanitize and assess the damage properly."
+                    </p>
+                  </div>
+
+                  <div className="mt-8 border-t pt-6">
+                    <h4 className="text-xl font-bold text-green-700 mb-4">🧼 Remediation Shop Inspection (Post-Disinfecting)</h4>
+                    <p className="text-gray-600 mb-4">Once the initial disinfecting by a licensed exterminator is complete, your vehicle should be taken to a qualified <strong>remediation shop</strong> for further inspection. This critical step ensures that no contamination remains within the ventilation or interior systems that could pose health risks to you or your family.</p>
+                    
+                    <h5 className="font-semibold text-gray-800 mb-3">What Happens at the Remediation Shop:</h5>
+                    <ul className="space-y-2 text-gray-600">
+                      <li>• Technicians will inspect the <strong>HVAC system</strong>, <strong>ducts</strong>, and other components for signs of dander, debris, or lingering odors.</li>
+                      <li>• If ventilation or internal components are found to be compromised, the shop will recommend and perform <strong>additional remediation work</strong>.</li>
+                      <li>• This step helps determine whether deeper cleaning or even part replacement is required before the appraiser approves repairs or declares a total loss.</li>
+                    </ul>
+                    
+                    <p className="text-gray-600 mt-4">
+                      <strong>If you're unsure where to go, your Claims Adjuster or Contact Centre can assist in locating a trusted remediation partner in your area.</strong>
+                    </p>
+                  </div>
+
+                  <div className="mt-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                    <p className="text-sm text-blue-800">
+                      <strong>🔒 Safety First:</strong> Letting your insurer coordinate towing to the <strong>exterminator</strong> and <strong>remediation shop</strong> protects you from having to drive a potentially contaminated vehicle — minimizing risk of exposure to airborne particles or hazardous residue.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Special RV water damage instructions */}
+              {category.id === 'rv-water' && (
+                <div className="mt-8 border-t pt-6">
+                  <h4 className="text-xl font-bold text-red-700 mb-4">🚐💧 Why Water Damage Claims on RVs Get Denied</h4>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-red-800 mb-3">1. Neglected Maintenance</h5>
+                      <ul className="text-red-700 space-y-1">
+                        <li>• Deteriorated seals, cracked caulking, or worn roof membranes</li>
+                        <li>• Leaks from aging plumbing or unmaintained water lines</li>
+                        <li>• Insurers expect regular upkeep — damage from neglect is excluded</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-red-800 mb-3">2. Gradual Damage</h5>
+                      <ul className="text-red-700 space-y-1">
+                        <li>• Slow leaks over time (e.g. roof seepage, condensation buildup)</li>
+                        <li>• Mold or mildew from long-term moisture exposure</li>
+                        <li>• Only <strong>sudden and accidental</strong> damage is covered — gradual issues are not</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-red-800 mb-3">3. Manufacturer Defects</h5>
+                      <ul className="text-red-700 space-y-1">
+                        <li>• Poor installation of roof, windows, or plumbing</li>
+                        <li>• Faulty seals or design flaws</li>
+                        <li>• These are usually excluded unless covered by a separate warranty</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-red-800 mb-3">4. Improper Winterization</h5>
+                      <ul className="text-red-700 space-y-1">
+                        <li>• Burst pipes due to freezing temperatures</li>
+                        <li>• Damage from not draining water systems or adding antifreeze</li>
+                        <li>• Considered preventable — often denied</li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-red-800 mb-3">5. Excluded Perils</h5>
+                      <ul className="text-red-700 space-y-1">
+                        <li>• Flooding, earthquakes, or sewer backup may not be covered unless added as endorsements</li>
+                        <li>• Standard policies may not include natural disasters</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 bg-green-50 p-6 rounded-lg">
+                    <h4 className="text-xl font-bold text-green-800 mb-4">✅ Types of Coverage That Can Protect Against Water Damage</h4>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-white p-4 rounded-lg">
+                        <h5 className="font-semibold text-green-700 mb-2">🟢 Comprehensive Coverage</h5>
+                        <p className="text-green-800 mb-2">Covers <strong>sudden and accidental</strong> water damage from:</p>
+                        <ul className="text-green-700 space-y-1 ml-5 list-disc">
+                          <li>Storms, hail, falling branches</li>
+                          <li>Vandalism or break-ins that allow water intrusion</li>
+                          <li>Flash floods (if listed as a covered peril)</li>
+                          <li>Mold remediation if directly tied to a covered event</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-white p-4 rounded-lg">
+                        <h5 className="font-semibold text-yellow-700 mb-2">🟡 Full-Time RV Insurance</h5>
+                        <p className="text-yellow-800">Designed for RVs used as primary residences with broader protection for water damage, personal property, and emergency lodging</p>
+                      </div>
+
+                      <div className="bg-white p-4 rounded-lg">
+                        <h5 className="font-semibold text-blue-700 mb-2">🔵 Endorsements & Extensions</h5>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="bg-gray-100">
+                                <th className="text-left py-2 px-3 font-semibold text-gray-800">Extension Type</th>
+                                <th className="text-left py-2 px-3 font-semibold text-gray-800">What It Covers</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              <tr>
+                                <td className="py-2 px-3 font-medium text-blue-700">Mold Remediation Endorsement</td>
+                                <td className="py-2 px-3 text-gray-700">Covers cleanup and removal of mold caused by water damage</td>
+                              </tr>
+                              <tr>
+                                <td className="py-2 px-3 font-medium text-blue-700">Flood Coverage Add-On</td>
+                                <td className="py-2 px-3 text-gray-700">Protects against rising water, flash floods, and storm surge</td>
+                              </tr>
+                              <tr>
+                                <td className="py-2 px-3 font-medium text-blue-700">Mechanical Breakdown Rider</td>
+                                <td className="py-2 px-3 text-gray-700">May cover plumbing failures or burst pipes</td>
+                              </tr>
+                              <tr>
+                                <td className="py-2 px-3 font-medium text-blue-700">Sewer Backup Coverage</td>
+                                <td className="py-2 px-3 text-gray-700">Covers damage from gray/black water tank overflow</td>
+                              </tr>
+                              <tr>
+                                <td className="py-2 px-3 font-medium text-blue-700">Emergency Repairs Clause</td>
+                                <td className="py-2 px-3 text-gray-700">Allows reimbursement for urgent water mitigation before inspection</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="mt-3 bg-yellow-50 p-3 rounded">
+                          <p className="text-sm text-yellow-800">
+                            <strong>📝 Tip:</strong> Ask your broker if your policy includes <strong>depreciation limits</strong> or <strong>sub-limits</strong> for water damage. Some policies cap payouts (e.g. $10,000 max) even if your RV is worth more.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 bg-blue-50 p-6 rounded-lg">
+                    <h4 className="text-xl font-bold text-blue-800 mb-4">📋 What You Can Do to Avoid Denial</h4>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-3 mt-1">•</span>
+                        <span className="text-gray-700"><strong>Document maintenance</strong>: Keep service records, roof inspections, and winterization receipts</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-3 mt-1">•</span>
+                        <span className="text-gray-700"><strong>Act fast</strong>: File claims within 24–48 hours of discovering damage</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-3 mt-1">•</span>
+                        <span className="text-gray-700"><strong>Take photos</strong>: Show the source of water, affected areas, and any temporary fixes</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-blue-600 mr-3 mt-1">•</span>
+                        <span className="text-gray-700"><strong>Ask about coverage gaps</strong>: Review your declarations page and request endorsements if needed</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'home':
+        return <HomeSection />;
+      case 'claims':
+        return <ClaimsSection />;
+      default:
+        return <HomeSection />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <Navigation />
+      <main>
+        {renderActiveSection()}
+      </main>
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">Auto Claim Academy</h3>
+              <p className="text-gray-300 mb-6">
+                Empowering consumers with the knowledge to navigate auto insurance claims 
+                and receive fair settlements.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><button onClick={() => setActiveSection('claims')} className="hover:text-white transition-colors block">Claim Guides</button></li>
+                <li><button onClick={() => setActiveSection('terms')} className="hover:text-white transition-colors block">Insurance Terms</button></li>
+                <li><button onClick={() => setActiveSection('repairs')} className="hover:text-white transition-colors block">Repairs Process</button></li>
+                <li><button onClick={() => setActiveSection('settlement')} className="hover:text-white transition-colors block">Cash Settlement</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Contact & Support</h4>
+              <div className="space-y-2 text-gray-300 text-sm">
+                <p>Have questions about your claim?</p>
+                <p>Email: support@autoclaimacademy.com</p>
+                <p>Hours: Mon-Fri, 9AM-5PM</p>
+                <button 
+                  onClick={() => setActiveSection('home')}
+                  className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+            <p>&copy; 2024 Auto Claim Academy. All rights reserved. | Educational resource only - not legal advice</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
+```
