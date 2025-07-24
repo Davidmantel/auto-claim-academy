@@ -7,7 +7,7 @@ Auto Claim Academy is a free educational website that helps drivers understand t
 - Plain-English insurance terms
 - Claim success tips and settlement strategies
 
-> Learn how to file smarter auto insurance claims with confidence.
+> Learn how to file smarter auto insurance claims with confidence. 
 
 ---
 
